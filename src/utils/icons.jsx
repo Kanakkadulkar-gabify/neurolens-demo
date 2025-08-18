@@ -12,6 +12,9 @@ export const MicIcon = () => (
 export const ArrowRightCircleIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="m12 16 4-4-4-4"/></svg>
 );
+export const ExclamationCircleIcon=()=>(
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256 512a256 256 0 1 0 0-512 256 256 0 1 0 0 512zm0-376c13.3 0 24 10.7 24 24l0 112c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-112c0-13.3 10.7-24 24-24zM229.3 352a26.7 26.7 0 1 1 53.3 0 26.7 26.7 0 1 1 -53.3 0z"/></svg>
+)
 export const Spinner = () => (
     <div className="border-4 border-slate-200 w-9 h-9 border-t-indigo-600 rounded-full animate-spin"></div>
 );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlayCircleIcon } from './Icons';
+import { PlayCircleIcon } from '../utils/icons';
 
 function StartScreen({ onStart }) {
     const [age, setAge] = useState('');
