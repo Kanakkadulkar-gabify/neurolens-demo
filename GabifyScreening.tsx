@@ -3,6 +3,47 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // Type definitions
+interface FormData {
+  // Step 1
+  firstName: string;
+  lastName: string;
+  age: string;
+  sex: string;
+  languagesSpoken: string;
+  phoneNumber: string;
+  provisionalDiagnosis: string;
+  briefHistory: string;
+  // Step 2
+  pregnancyHistory: string;
+  pregnancyComplications: string;
+  generalDevelopment: string;
+  delayedDevelopment: string;
+  birthCry: string;
+  birthWeight: string;
+  motorGeneral: string;
+  motorNeck: string;
+  motorSitting: string;
+  motorWalking: string;
+  babblingAge: string;
+  firstWordAge: string;
+  firstSentence: string;
+  firstSentenceAge: string;
+  // Step 3
+  attentionSpan: string;
+  eyeContact: string;
+  imitationAbility: string;
+  socialSkills: string;
+  selfHelpSkills: string;
+  grossMotorSkills: string;
+  fineMotorSkills: string;
+  receptiveLanguageAge: string;
+  expressiveLanguageAge: string;
+  receptiveVocabulary: string;
+  expressiveVocabulary: string;
+  familyType: string;
+  socialSetting: string;
+}
+
 interface Activity {
   prompt_text: string;
   image_query: string;
@@ -16,9 +57,19 @@ interface ScreeningData {
 
 interface GabifyScreeningProps {
   geminiApiKey: string;
-  onComplete?: (data: ScreeningData & { age: number }) => void;
+  onComplete?: (data: ScreeningData & { age: number; formData?: FormData }) => void;
   className?: string;
   showTitle?: boolean;
+  showEvaluationForm?: boolean;
+}
+
+interface EvaluationFormProps {
+  onSuccess: (formData: FormData) => void;
+}
+
+interface UserOptionsProps {
+  setScreen: (screen: string) => void;
+  formData: FormData;
 }
 
 interface StartScreenProps {
@@ -35,6 +86,7 @@ interface CompletionScreenProps {
   blob: Blob | null;
   activities: Activity[];
   age: number;
+  formData?: FormData;
   onRestart: () => void;
   apiKey: string;
 }
@@ -232,6 +284,1109 @@ const CheckCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
 const Spinner: React.FC = () => (
   <div className="border-4 border-slate-200 w-9 h-9 border-t-indigo-600 rounded-full animate-spin"></div>
 );
+
+// Evaluation Form Component
+const EvaluationForm: React.FC<EvaluationFormProps> = ({ onSuccess }) => {
+  const [step, setStep] = useState<number>(1);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>({
+    // Step 1
+    firstName: "",
+    lastName: "",
+    age: "",
+    sex: "",
+    languagesSpoken: "",
+    phoneNumber: "",
+    provisionalDiagnosis: "",
+    briefHistory: "",
+    // Step 2
+    pregnancyHistory: "",
+    pregnancyComplications: "",
+    generalDevelopment: "",
+    delayedDevelopment: "",
+    birthCry: "",
+    birthWeight: "",
+    motorGeneral: "",
+    motorNeck: "",
+    motorSitting: "",
+    motorWalking: "",
+    babblingAge: "",
+    firstWordAge: "",
+    firstSentence: "",
+    firstSentenceAge: "",
+    // Step 3
+    attentionSpan: "",
+    eyeContact: "",
+    imitationAbility: "",
+    socialSkills: "",
+    selfHelpSkills: "",
+    grossMotorSkills: "",
+    fineMotorSkills: "",
+    receptiveLanguageAge: "",
+    expressiveLanguageAge: "",
+    receptiveVocabulary: "",
+    expressiveVocabulary: "",
+    familyType: "",
+    socialSetting: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const showToast = (message: string, duration: number = 1000): void => {
+    setToastMsg(message);
+    setTimeout(() => setToastMsg(null), duration);
+  };
+
+  const nextStep = (e: React.FormEvent): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    setStep((s) => Math.min(s + 1, 3));
+  };
+
+  const prevStep = (): void => setStep((s) => Math.max(s - 1, 1));
+
+  const handleSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    console.log("Submitted Data:", formData);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      showToast("Form submitted! Check console for data.", 2000);
+      setTimeout(() => {
+        if (onSuccess) {
+          onSuccess(formData);
+        }
+      }, 2000);
+    }, 1000);
+  };
+
+  return (
+    <div className="w-full h-full max-w-[100vw]">
+      {toastMsg && (
+        <div className="absolute top-4 right-4 bg-green-600 text-white px-4 py-3 rounded-xl shadow-lg animate-fade-in-out z-10">
+          <div className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <span>{toastMsg}</span>
+          </div>
+        </div>
+      )}
+      <div className="w-4xl mx-auto p-8 bg-gradient-to-br from-purple-50 to-violet-100 shadow-lg rounded-2xl border border-blue-200">
+        <div className="flex flex-col space-y-2 mb-4">
+          <h1 className="text-2xl font-bold text-purple-600 text-center">
+            Evaluation Form
+          </h1>
+          <p className="text-center text-sm text-blue-800">
+            Please fill out the form below to the best of your ability.
+          </p>
+        </div>
+        <form onSubmit={handleSubmit}>
+          {/* Step Indicators */}
+          <div className="flex justify-between mb-8">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`flex-1 text-center py-2 rounded-full mx-1 text-sm font-medium ${
+                  step === s
+                    ? "bg-purple-600 text-white"
+                    : "bg-blue-100 text-purple-600"
+                }`}
+              >
+                Step {s}
+              </div>
+            ))}
+          </div>
+
+          {/* Step 1 */}
+          {step === 1 && (
+            <div className="space-y-6 w-full bg-white py-8 px-5 rounded-lg">
+              <label className="font-medium mb-2">
+                Name <span className="text-red-600">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-6">
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="border rounded-lg p-2 w-full"
+                />
+
+                <div className="flex flex-col">
+                  <label className="font-medium mb-1">
+                    Age <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    placeholder="e.g., 2.3 (2 years 3 months)"
+                    value={formData.age}
+                    onChange={handleChange}
+                    required
+                    step="0.1"
+                    min="0"
+                    className="border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none rounded-lg p-2 w-full"
+                  />
+                  <span className="text-xs text-gray-500">Years/ Months</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="font-medium">
+                    Sex <span className="text-red-600">*</span>
+                  </label>
+                  <div className="flex space-x-4 mt-1">
+                    {["Male", "Female", "Other"].map((option) => (
+                      <label key={option} className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="sex"
+                          value={option}
+                          checked={formData.sex === option}
+                          onChange={handleChange}
+                          required
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="font-medium mb-1">Languages Spoken:</label>
+                  <input
+                    type="text"
+                    name="languagesSpoken"
+                    placeholder="Languages Spoken"
+                    value={formData.languagesSpoken}
+                    onChange={handleChange}
+                    className="border rounded-lg p-2 w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="font-medium mb-1">
+                    Phone Number (WhatsApp Preferred){" "}
+                    <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="(000) 000-0000"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    required
+                    className="border rounded-lg p-2 w-full"
+                  />
+                  <span className="text-xs text-gray-500">
+                    We will be sending the report on this number
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-medium">
+                  Provisional Diagnosis (if any)
+                </label>
+                <textarea
+                  name="provisionalDiagnosis"
+                  rows={4}
+                  placeholder=""
+                  value={formData.provisionalDiagnosis}
+                  onChange={handleChange}
+                  className="border resize-none rounded-lg p-2 w-full"
+                />
+                <span className="text-xs text-gray-500">
+                  Please mention the past findings if any
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-medium">Brief History</label>
+                <textarea
+                  name="briefHistory"
+                  rows={4}
+                  placeholder=""
+                  value={formData.briefHistory}
+                  onChange={handleChange}
+                  className="border resize-none rounded-lg p-2 w-full"
+                />
+                <span className="text-xs text-gray-500">
+                  Please provide summary of child's history
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 */}
+          {step === 2 && (
+            <div className="space-y-6 w-full bg-white py-8 px-5 rounded-lg">
+              <h2 className="text-xl font-semibold text-blue-700">
+                Pre-natal History
+              </h2>
+              <div className="grid grid-cols-2 gap-4 items-center">
+                <div>
+                  <label className="block font-medium">
+                    Significant History During Pregnancy:
+                  </label>
+                  <div className="space-y-1 mt-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="pregnancyHistory"
+                        value="Normal"
+                        checked={formData.pregnancyHistory === "Normal"}
+                        onChange={handleChange}
+                      />{" "}
+                      Normal
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="pregnancyHistory"
+                        value="Complicated"
+                        checked={formData.pregnancyHistory === "Complicated"}
+                        onChange={handleChange}
+                      />{" "}
+                      Complicated
+                    </label>
+                  </div>
+                </div>
+
+                <input
+                  type="text"
+                  name="pregnancyComplications"
+                  placeholder="If complicated, please specify"
+                  value={formData.pregnancyComplications}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+              </div>
+
+              <h2 className="text-xl font-semibold text-blue-700">
+                Developmental History
+              </h2>
+              <div className="grid grid-cols-2 gap-4 items-center">
+                <div>
+                  <label className="block font-medium">
+                    General Development:
+                  </label>
+                  <div className="space-y-1 mt-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="generalDevelopment"
+                        value="Adequately Achieved"
+                        checked={formData.generalDevelopment === "Adequately Achieved"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequately Achieved
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="generalDevelopment"
+                        value="Delayed"
+                        checked={formData.generalDevelopment === "Delayed"}
+                        onChange={handleChange}
+                      />{" "}
+                      Delayed
+                    </label>
+                  </div>
+                </div>
+
+                <input
+                  type="text"
+                  name="delayedDevelopment"
+                  placeholder="If delayed, specify"
+                  value={formData.delayedDevelopment}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+              </div>
+
+              <h2 className="text-xl font-semibold text-blue-700">
+                Post-natal History
+              </h2>
+              <div className="grid grid-cols-2 gap-4 items-center">
+                <div>
+                  <label className="block font-medium">Birth Cry:</label>
+                  <div className="space-y-1 mt-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="birthCry"
+                        value="Present"
+                        checked={formData.birthCry === "Present"}
+                        onChange={handleChange}
+                      />{" "}
+                      Present
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="birthCry"
+                        value="Absent"
+                        checked={formData.birthCry === "Absent"}
+                        onChange={handleChange}
+                      />{" "}
+                      Absent
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="birthCry"
+                        value="Delayed"
+                        checked={formData.birthCry === "Delayed"}
+                        onChange={handleChange}
+                      />{" "}
+                      Delayed
+                    </label>
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  name="birthWeight"
+                  placeholder="Birth Weight (in KGs)"
+                  value={formData.birthWeight}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+              </div>
+
+              <h2 className="text-xl font-semibold text-blue-700">
+                Motor Milestones
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium mb-1">General:</label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorGeneral"
+                      value="Adequately Achieved"
+                      checked={formData.motorGeneral === "Adequately Achieved"}
+                      onChange={handleChange}
+                    />{" "}
+                    Adequately Achieved
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorGeneral"
+                      value="Delayed"
+                      checked={formData.motorGeneral === "Delayed"}
+                      onChange={handleChange}
+                    />{" "}
+                    Delayed
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorGeneral"
+                      value="Advanced"
+                      checked={formData.motorGeneral === "Advanced"}
+                      onChange={handleChange}
+                    />{" "}
+                    Advanced
+                  </label>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Neck Control:</label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorNeck"
+                      value="Age appropriate"
+                      checked={formData.motorNeck === "Age appropriate"}
+                      onChange={handleChange}
+                    />{" "}
+                    Age appropriate
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorNeck"
+                      value="Delayed"
+                      checked={formData.motorNeck === "Delayed"}
+                      onChange={handleChange}
+                    />{" "}
+                    Delayed
+                  </label>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Sitting:</label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorSitting"
+                      value="Age appropriate"
+                      checked={formData.motorSitting === "Age appropriate"}
+                      onChange={handleChange}
+                    />{" "}
+                    Age appropriate
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorSitting"
+                      value="Delayed"
+                      checked={formData.motorSitting === "Delayed"}
+                      onChange={handleChange}
+                    />{" "}
+                    Delayed
+                  </label>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Walking:</label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorWalking"
+                      value="Age appropriate"
+                      checked={formData.motorWalking === "Age appropriate"}
+                      onChange={handleChange}
+                    />{" "}
+                    Age appropriate
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="motorWalking"
+                      value="Delayed"
+                      checked={formData.motorWalking === "Delayed"}
+                      onChange={handleChange}
+                    />{" "}
+                    Delayed
+                  </label>
+                </div>
+              </div>
+
+              <h2 className="text-lg font-semibold text-blue-700">
+                Speech Milestones
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="number"
+                  name="babblingAge"
+                  placeholder="Babbling (Age)"
+                  value={formData.babblingAge}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="number"
+                  name="firstWordAge"
+                  placeholder="First Word (Age)"
+                  value={formData.firstWordAge}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <div>
+                  <label className="block font-medium mb-1">
+                    First Sentence (Status):
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="firstSentence"
+                      value="Achieved"
+                      checked={formData.firstSentence === "Achieved"}
+                      onChange={handleChange}
+                    />{" "}
+                    Achieved
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="firstSentence"
+                      value="Not yet achieved"
+                      checked={formData.firstSentence === "Not yet achieved"}
+                      onChange={handleChange}
+                    />{" "}
+                    Not yet achieved
+                  </label>
+                </div>
+                {formData.firstSentence === "Achieved" && (
+                  <input
+                    type="number"
+                    name="firstSentenceAge"
+                    placeholder="If achieved (specify age)"
+                    value={formData.firstSentenceAge}
+                    onChange={handleChange}
+                    className="border rounded-lg p-2 w-full"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3 */}
+          {step === 3 && (
+            <div className="space-y-6 w-full bg-white py-8 px-5 rounded-lg">
+              <h2 className="text-lg font-semibold text-blue-700">
+                Psychological Evaluation
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-medium">Attention Span:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="attentionSpan"
+                        value="Adequate"
+                        checked={formData.attentionSpan === "Adequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="attentionSpan"
+                        value="Inadequate"
+                        checked={formData.attentionSpan === "Inadequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Inadequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="attentionSpan"
+                        value="Variable"
+                        checked={formData.attentionSpan === "Variable"}
+                        onChange={handleChange}
+                      />{" "}
+                      Variable
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Eye Contact:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="eyeContact"
+                        value="Adequate"
+                        checked={formData.eyeContact === "Adequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="eyeContact"
+                        value="Poor"
+                        checked={formData.eyeContact === "Poor"}
+                        onChange={handleChange}
+                      />{" "}
+                      Poor
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="eyeContact"
+                        value="Avoidant"
+                        checked={formData.eyeContact === "Avoidant"}
+                        onChange={handleChange}
+                      />{" "}
+                      Avoidant
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Imitation Ability:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="imitationAbility"
+                        value="Present"
+                        checked={formData.imitationAbility === "Present"}
+                        onChange={handleChange}
+                      />{" "}
+                      Present
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="imitationAbility"
+                        value="Absent"
+                        checked={formData.imitationAbility === "Absent"}
+                        onChange={handleChange}
+                      />{" "}
+                      Absent
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="imitationAbility"
+                        value="Partial"
+                        checked={formData.imitationAbility === "Partial"}
+                        onChange={handleChange}
+                      />{" "}
+                      Partial
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Social Skills:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="socialSkills"
+                        value="Adequate"
+                        checked={formData.socialSkills === "Adequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="socialSkills"
+                        value="Withdrawn"
+                        checked={formData.socialSkills === "Withdrawn"}
+                        onChange={handleChange}
+                      />{" "}
+                      Withdrawn
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="socialSkills"
+                        value="Inappropriate"
+                        checked={formData.socialSkills === "Inappropriate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Inappropriate
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Self-Help Skills:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="selfHelpSkills"
+                        value="Independent"
+                        checked={formData.selfHelpSkills === "Independent"}
+                        onChange={handleChange}
+                      />{" "}
+                      Independent
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="selfHelpSkills"
+                        value="Needs Assistance"
+                        checked={formData.selfHelpSkills === "Needs Assistance"}
+                        onChange={handleChange}
+                      />{" "}
+                      Needs Assistance
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="selfHelpSkills"
+                        value="Dependent"
+                        checked={formData.selfHelpSkills === "Dependent"}
+                        onChange={handleChange}
+                      />{" "}
+                      Dependent
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Gross Motor Skills:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="grossMotorSkills"
+                        value="Adequate"
+                        checked={formData.grossMotorSkills === "Adequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="grossMotorSkills"
+                        value="Clumsy"
+                        checked={formData.grossMotorSkills === "Clumsy"}
+                        onChange={handleChange}
+                      />{" "}
+                      Clumsy
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="grossMotorSkills"
+                        value="Delayed"
+                        checked={formData.grossMotorSkills === "Delayed"}
+                        onChange={handleChange}
+                      />{" "}
+                      Delayed
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-medium">Fine Motor Skills:</label>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        name="fineMotorSkills"
+                        value="Adequate"
+                        checked={formData.fineMotorSkills === "Adequate"}
+                        onChange={handleChange}
+                      />{" "}
+                      Adequate
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="fineMotorSkills"
+                        value="Poor"
+                        checked={formData.fineMotorSkills === "Poor"}
+                        onChange={handleChange}
+                      />{" "}
+                      Poor
+                    </label>
+                    <br />
+                    <label>
+                      <input
+                        type="radio"
+                        name="fineMotorSkills"
+                        value="Delayed"
+                        checked={formData.fineMotorSkills === "Delayed"}
+                        onChange={handleChange}
+                      />{" "}
+                      Delayed
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <h2 className="text-lg font-semibold text-blue-700">
+                Language Evaluation
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="receptiveLanguageAge"
+                  placeholder="Receptive Language Age (e.g., 23)"
+                  value={formData.receptiveLanguageAge}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="text"
+                  name="expressiveLanguageAge"
+                  placeholder="Expressive Language Age (e.g., 23)"
+                  value={formData.expressiveLanguageAge}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="text"
+                  name="receptiveVocabulary"
+                  placeholder="Receptive Vocabulary (understanding)"
+                  value={formData.receptiveVocabulary}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="text"
+                  name="expressiveVocabulary"
+                  placeholder="Expressive Vocabulary (use)"
+                  value={formData.expressiveVocabulary}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+              </div>
+
+              <h2 className="text-lg font-semibold text-blue-700">
+                Social Context
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="familyType"
+                  placeholder="Family Type (e.g., Joint, Nuclear)"
+                  value={formData.familyType}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+                <input
+                  type="text"
+                  name="socialSetting"
+                  placeholder="Social Setting (e.g., Attends school, College, Works)"
+                  value={formData.socialSetting}
+                  onChange={handleChange}
+                  className="border rounded-lg p-2 w-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg"
+              >
+                Back
+              </button>
+            )}
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="ml-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="ml-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// User Options Component
+const UserOptions: React.FC<UserOptionsProps> = ({ setScreen, formData }) => {
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const validFileTypes = ["video/mp4", "video/quicktime"];
+  const maxFileSize = 5 * 1024 * 1024;
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!validFileTypes.includes(file.type)) {
+      setError("Invalid file type. Please upload MP4 or MOV files.");
+      return;
+    }
+
+    if (file.size > maxFileSize) {
+      setError("File too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setUploadedFile(file);
+    setUploadProgress(0);
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 10;
+      if (progress >= 100) {
+        clearInterval(interval);
+        setUploadProgress(100);
+      } else {
+        setUploadProgress(progress);
+      }
+    }, 200);
+  };
+
+  const removeFile = (): void => {
+    setUploadedFile(null);
+    setUploadProgress(0);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleLiveRecording = (): void => {
+    setScreen("screening");
+  };
+
+  return (
+    <div>
+      <p className="text-2xl text-center font-medium text-gray-700 mb-6">
+        Choose how to proceed
+      </p>
+      <div className="w-3xl mx-auto bg-white p-6 rounded-xl shadow border border-purple-100">
+        <h2 className="text-xl font-semibold text-purple-700 mb-4">
+          Upload a video
+        </h2>
+        <p className="text-sm text-gray-500 mb-3">Upload a 2 mins Video</p>
+
+        <label
+          className={`flex flex-col items-center justify-center w-full p-8 border-2 border-dashed rounded-xl cursor-pointer transition
+            ${
+              uploadedFile
+                ? "border-green-300 bg-green-50"
+                : "border-purple-300 hover:border-purple-400 hover:bg-purple-50"
+            }
+          `}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-10 w-10 text-purple-500 mb-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
+          </svg>
+
+          {uploadedFile ? (
+            <>
+              <p className="text-green-700 font-medium">File Ready</p>
+              <p className="text-sm text-green-600 truncate max-w-xs">
+                {uploadedFile.name}
+              </p>
+              <p className="text-xs text-green-500">
+                {(uploadedFile.size / 1024).toFixed(2)} KB
+              </p>
+
+              {uploadProgress < 100 ? (
+                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3">
+                  <div
+                    className="bg-purple-600 h-2.5 rounded-full"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                  <p className="text-xs text-purple-600 mt-1">
+                    {Math.round(uploadProgress)}% uploaded
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    removeFile();
+                  }}
+                  className="mt-3 text-xs text-red-500 hover:text-red-700"
+                >
+                  Remove file
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="text-purple-700 font-medium">Browse Files</p>
+              <p className="text-xs text-gray-500">Drag and drop files here</p>
+            </>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/mp4,video/quicktime"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+        </label>
+
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+
+        <div className="flex mt-3 mb-3 items-center gap-2">
+          <div className="w-[50%] h-0.5 bg-black"></div>
+          <p className="text-black">OR</p>
+          <div className="w-[50%] h-0.5 bg-black"></div>
+        </div>
+
+        <div className="mt-4 relative">
+          <p className="text-sm text-center text-gray-600 mb-3">
+            Don't have a video to upload? Take the live screening test for the
+            most accurate, real-time analysis.
+          </p>
+          <button
+            onClick={handleLiveRecording}
+            className="relative w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-xl hover:shadow-lg transition-all shadow-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 012.728-2.728"
+              />
+            </svg>
+            <span className="font-semibold">Go to Live Screening</span>
+          </button>
+          <p className="mt-2 text-xs text-center text-purple-400">
+            Real-time audio analysis
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Start Screen Component
 const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
@@ -524,7 +1679,7 @@ const ScreeningScreen: React.FC<ScreeningScreenProps> = ({ age, onComplete, apiK
 };
 
 // Completion Screen Component
-const CompletionScreen: React.FC<CompletionScreenProps> = ({ blob, activities, age, onRestart, apiKey }) => {
+const CompletionScreen: React.FC<CompletionScreenProps> = ({ blob, activities, age, formData, onRestart, apiKey }) => {
   const [report, setReport] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const downloadUrl = blob ? URL.createObjectURL(blob) : null;
@@ -532,6 +1687,7 @@ const CompletionScreen: React.FC<CompletionScreenProps> = ({ blob, activities, a
 
   const handleGenerateReport = async (): Promise<void> => {
     setIsGenerating(true);
+    const prompt = `You are an AI assistant for the Gabify Screening App. A screening was completed for ${formData?.firstName || 'a patient'} ${formData?.lastName || ''} who is ${age} years old. Patient details: ${formData ? `Sex: ${formData.sex}, Languages: ${formData.languagesSpoken}, Phone: ${formData.phoneNumber}` : 'Limited details available'}. The following activities were presented: ${activities.map(a => `"${a.prompt_text}"`).join(', ')}. Generate a comprehensive report including patient information, screening activities, potential strengths, areas for observation, and recommendations. Include a disclaimer that this is not a medical diagnosis.`;
     const markdownReport = await api.generateReport(age, activities);
     const htmlReport = markdownReport
       .replace(/### (.*)/g, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
@@ -590,11 +1746,13 @@ const GabifyScreening: React.FC<GabifyScreeningProps> = ({
   geminiApiKey, 
   onComplete, 
   className = "",
-  showTitle = true 
+  showTitle = true,
+  showEvaluationForm = true
 }) => {
-  const [screen, setScreen] = useState<string>("start");
+  const [screen, setScreen] = useState<string>(showEvaluationForm ? "form" : "start");
   const [age, setAge] = useState<number | null>(null);
   const [screeningData, setScreeningData] = useState<ScreeningData | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(null);
 
   if (!geminiApiKey) {
     return (
@@ -604,6 +1762,12 @@ const GabifyScreening: React.FC<GabifyScreeningProps> = ({
       </div>
     );
   }
+
+  const handleFormSubmit = (submittedFormData: FormData): void => {
+    setFormData(submittedFormData);
+    setAge(parseFloat(submittedFormData.age));
+    setScreen("options");
+  };
 
   const handleStartScreening = (selectedAge: number): void => {
     setAge(selectedAge);
@@ -615,25 +1779,28 @@ const GabifyScreening: React.FC<GabifyScreeningProps> = ({
     setScreeningData(data);
     setScreen('completion');
     if (onComplete && age) {
-      onComplete({ ...data, age });
+      onComplete({ ...data, age, formData: formData || undefined });
     }
   };
 
   const handleRestart = (): void => {
-    setScreen('start');
+    setScreen(showEvaluationForm ? 'form' : 'start');
     setAge(null);
     setScreeningData(null);
+    setFormData(null);
   };
 
   return (
     <div className={`w-full max-w-4xl mx-auto p-4 md:p-6 flex items-center justify-center min-h-screen ${className}`}>
-      {showTitle && screen === 'start' && (
+      {showTitle && (screen === 'start' || screen === 'form') && (
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-purple-700 mb-2">Gabify</h1>
           <p className="text-gray-600">AI-Powered Speech Screening</p>
         </div>
       )}
       
+      {screen === 'form' && <EvaluationForm onSuccess={handleFormSubmit} />}
+      {screen === 'options' && formData && <UserOptions setScreen={setScreen} formData={formData} />}
       {screen === 'start' && <StartScreen onStart={handleStartScreening} />}
       {screen === 'screening' && age && (
         <ScreeningScreen 
@@ -646,6 +1813,7 @@ const GabifyScreening: React.FC<GabifyScreeningProps> = ({
         <CompletionScreen 
           {...screeningData} 
           age={age} 
+          formData={formData || undefined}
           onRestart={handleRestart}
           apiKey={geminiApiKey}
         />
