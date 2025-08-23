@@ -1,21 +1,21 @@
-# Gabify Screening Component for Next.js
+# Gabify Screening TypeScript Component for Next.js
 
-A standalone React component for speech and language screening that can be easily integrated into any Next.js project.
+A standalone TypeScript React component for speech and language screening that can be easily integrated into any Next.js project.
 
 ## Installation
 
-1. Copy the `GabifyScreening.jsx` file to your Next.js project's components directory
+1. Copy the `GabifyScreening.tsx` file to your Next.js project's components directory
 2. Install required dependencies:
 
 ```bash
-npm install react react-dom
+npm install react react-dom @types/react @types/react-dom
 ```
 
-3. Make sure you have Tailwind CSS configured in your Next.js project
+3. Make sure you have Tailwind CSS and TypeScript configured in your Next.js project
 
 ## Usage
 
-```jsx
+```tsx
 import GabifyScreening from './components/GabifyScreening';
 
 export default function MyPage() {
@@ -39,10 +39,28 @@ export default function MyPage() {
 
 ## Props
 
-- `geminiApiKey` (string, required): Your Google Gemini API key
+- `geminiApiKey` (string, **required**): Your Google Gemini API key
 - `onComplete` (function, optional): Callback function called when screening is completed
+  - Type: `(data: { blob: Blob | null; activities: Activity[]; age: number }) => void`
 - `showTitle` (boolean, optional): Whether to show the Gabify title (default: true)
 - `className` (string, optional): Additional CSS classes to apply to the container
+
+## TypeScript Types
+
+The component exports the following types:
+
+```tsx
+interface Activity {
+  prompt_text: string;
+  image_query: string;
+  task_type: 'verbal' | 'motor' | 'imitation' | 'comprehension' | 'reasoning';
+}
+
+interface ScreeningData {
+  blob: Blob | null;
+  activities: Activity[];
+}
+```
 
 ## Features
 
@@ -71,14 +89,18 @@ The component uses Tailwind CSS classes. Make sure your Next.js project has Tail
 
 ## Example Integration
 
-```jsx
+```tsx
 'use client';
 
 import { useState } from 'react';
 import GabifyScreening from './components/GabifyScreening';
 
 export default function ScreeningPage() {
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<{
+    blob: Blob | null;
+    activities: Activity[];
+    age: number;
+  } | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -113,7 +135,8 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
 
 ## Notes
 
-- The component is designed to work in client-side environments only (use 'use client' directive in Next.js)
+- The component is designed to work in client-side environments only (use `'use client'` directive in Next.js)
+- Full TypeScript support with proper type definitions
 - Recording format is WebM, which is supported by most modern browsers
 - The component handles all media permissions and error states internally
 - Generated images and audio are temporary and not stored permanently
